@@ -47,10 +47,35 @@
       }
     }
 
-    // Format a Date object as HH:MM
-    function formatTime(date) {
-      const hh = String(date.getHours()).padStart(2, "0");
-      const mm = String(date.getMinutes()).padStart(2, "0");
+    function getCETParts(date) {
+      const fmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Berlin",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      const parts = fmt.formatToParts(date);
+      const map = {};
+      for (const part of parts) {
+        if (part.type !== "literal") {
+          map[part.type] = part.value;
+        }
+      }
+      return {
+        year: Number(map.year),
+        month: Number(map.month),
+        day: Number(map.day),
+        hour: Number(map.hour),
+        minute: Number(map.minute)
+      };
+    }
+
+    function formatTimeParts(parts) {
+      const hh = String(parts.hour).padStart(2, "0");
+      const mm = String(parts.minute).padStart(2, "0");
       return hh + ":" + mm;
     }
 
@@ -59,16 +84,22 @@
       const tbody = document.querySelector("#signal-table tbody");
       tbody.innerHTML = "";
 
+      if (location.protocol === "file:") {
+        statusEl.textContent = "Trying direct API fetch; this may be blocked by CORS when opened as file://.";
+      }
+
+      const apiUrl = "https://api.energy-charts.info/signal?country=de&postal_code=80339";
+
       try {
-        const resp = await fetch("https://api.energy-charts.info/signal?country=de&postal_code=80339");
+        const resp = await fetch(apiUrl);
         if (!resp.ok) {
           throw new Error("HTTP " + resp.status);
         }
         const data = await resp.json();
 
-        // Expecting something like: { timestamps: [...], share_renewables: [...], signal: [...] }
-        const times = data.timestamps || data.time || [];
-        const shares = data.share_renewables || data.renewable_share || [];
+        // Expecting something like: { unix_seconds: [...], share: [...], signal: [...] }
+        const times = data.timestamps || data.time || data.unix_seconds || [];
+        const shares = data.share_renewables || data.renewable_share || data.share || [];
         const signals = data.signal || data.signals || [];
 
         if (!times.length || !signals.length) {
@@ -76,23 +107,7 @@
           return;
         }
 
-        // Determine today's date in CET
-        const now = new Date();
-        const todayCET = new Date(
-          now.toLocaleString("en-US", { timeZone: "Europe/Berlin" })
-        );
-        const y = todayCET.getFullYear();
-        const m = todayCET.getMonth();
-        const d = todayCET.getDate();
-
-        // Construct 08:00 and 23:00 bounds in CET
-        const startCET = new Date(Date.UTC(y, m, d, 0, 0));
-        const endCET = new Date(Date.UTC(y, m, d, 0, 0));
-
-        // Adjust bounds to 08:00–23:00 CET
-        startCET.setHours(8);
-        endCET.setHours(23);
-
+        const todayCET = getCETParts(new Date());
         let rowsAdded = 0;
 
         for (let i = 0; i < times.length; i++) {
@@ -105,11 +120,14 @@
           }
 
           const dt = new Date(t);
-          const dtCET = new Date(
-            dt.toLocaleString("en-US", { timeZone: "Europe/Berlin" })
-          );
+          const dtCET = getCETParts(dt);
 
-          if (dtCET < startCET || dtCET > endCET) {
+          const sameDay =
+            dtCET.year === todayCET.year &&
+            dtCET.month === todayCET.month &&
+            dtCET.day === todayCET.day;
+
+          if (!sameDay || dtCET.hour < 8 || dtCET.hour > 23) {
             continue;
           }
 
@@ -127,7 +145,7 @@
           }
 
           const tdTime = document.createElement("td");
-          tdTime.textContent = formatTime(dtCET);
+          tdTime.textContent = formatTimeParts(dtCET);
 
           const tdShare = document.createElement("td");
           tdShare.textContent = shareVal.toFixed
@@ -149,13 +167,13 @@
         }
 
         if (rowsAdded === 0) {
-          statusEl.textContent = "Data unavailable now, check again later.";
+          statusEl.textContent = "No rows for today 08:00–23:00 CET.";
         } else {
           statusEl.textContent = "Showing today’s values between 08:00 and 23:00 CET.";
         }
       } catch (err) {
         console.error(err);
-        statusEl.textContent = "Data unavailable now, check again later.";
+        statusEl.textContent = "Fetch failed: " + (err && err.message ? err.message : "Unknown error");
       }
     }
 
@@ -163,4 +181,3 @@
   </script>
 </body>
 </html>
-

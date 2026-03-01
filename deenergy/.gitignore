@@ -1,12 +1,1 @@
-# xcode files
-*.xcodeproj/
-*.xcworkspace/
-xcuserdata/
-
-# build artifacts
-DerivedData/
-.build/
-
-# SwiftPM
-.swiftpm/
-Package.resolved
+.gitignore

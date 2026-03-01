@@ -1,35 +1,26 @@
 # DE Renewable Signal (80339)
 
-This project is a simple static HTML page that shows the current renewable share of electricity and the corresponding traffic-light signal for Germany (postal code **80339**) using the public API from [energy-charts.info](https://energy-charts.info).
-
-The page:
-- Loads live data directly from the API in your browser.
-- Filters **today’s** data between **08:00 and 23:00 CET**.
-- Displays a table with:
-  - Time (CET)
-  - Renewable Share (%)
-  - Signal (Red / Yellow / Green)
-  - Signal Description
-- Colors rows based on the signal:
-  - Red – grid congestion or low renewable share  
-  - Yellow – average renewable share  
-  - Green – high renewable share
+This project provides a simple static HTML page that shows the renewable share of electricity and the corresponding traffic-light signal for Germany (postal code **80339**) using the public API from [energy-charts.info](https://energy-charts.info).
 
 ## How to use
 
-1. Clone and open the project:
-   ```bash
-   git clone https://github.com/rubao13/deenergy.git
-   cd <your-repo>
-   # macOS / Linux
-    open de_renewable_signal.html
+Note: Opening the HTML file directly with `file://` will not load data due to CORS.
 
-   # Windows
-    start de_renewable_signal.html
-´´´
-2. The page will load and display the current renewable share and signal for Germany (80339).
+### GitHub Actions pipeline
 
-### To do
+A workflow at `.github/workflows/build-html.yml` fetches the API in Job 1, then builds a static HTML file in Job 2 and uploads it as an artifact.
 
-Dynamic ZIP code
+- Artifact from Job 1: `api-data` (raw API JSON)
+- Artifact from Job 2: `html-page` (`dist/de_renewable_signal.html`)
 
+### Local build (static HTML)
+
+```bash
+python3 scripts/build_html.py --input tests/fixtures/api_sample.json --output dist/de_renewable_signal.html --postal-code 80339 --date 2026-03-01
+```
+
+### Tests
+
+```bash
+python3 -m unittest tests/test_build_html.py
+```
