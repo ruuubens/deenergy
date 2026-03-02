@@ -8,10 +8,17 @@ Note: Opening the HTML file directly with `file://` will not load data due to CO
 
 ### GitHub Actions pipeline
 
-A workflow at `.github/workflows/build-html.yml` fetches the API in Job 1, then builds a static HTML file in Job 2 and uploads it as an artifact.
+A workflow at `.github/workflows/build-html.yml` fetches the API in Job 1, then builds a static HTML file in Job 2 and uploads it as an artifact. It also publishes the output to GitHub Pages.
 
 - Artifact from Job 1: `api-data` (raw API JSON)
 - Artifact from Job 2: `html-page` (`dist/de_renewable_signal.html`)
+- Pages output: `dist/index.html` (copy of `dist/de_renewable_signal.html`)
+
+To enable Pages, set the repository Pages source to **GitHub Actions**.
+
+Once enabled, the site will be available at:
+
+- `https://rubao13.github.io/deenergy/`
 
 ### Local build (static HTML)
 
