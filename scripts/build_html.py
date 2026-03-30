@@ -61,7 +61,7 @@ def build_rows(payload, day_cet):
 
 def render_html(rows, postal_code, day_cet):
     date_str = day_cet.strftime("%Y-%m-%d")
-    title = f"Germany Renewable share of electricity - München (80339) ({date_str})"
+    title = f"Renewable share of electricity ({date_str}) - München (80339) Germany"
     status = "No rows for today 08:00-23:00 CET." if not rows else "Showing today's values between 08:00 and 23:00 CET."
 
     row_html = []
@@ -97,7 +97,7 @@ def render_html(rows, postal_code, day_cet):
   </style>
 </head>
 <body>
-  <h1>Germany Renewable Share Signal - {postal_code} ({date_str}, CET)</h1>
+  <h1>{title}</h1>
   <div id=\"status\">{status}</div>
   <table>
     <thead>

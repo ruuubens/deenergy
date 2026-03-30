@@ -18,7 +18,7 @@ To enable Pages, set the repository Pages source to **GitHub Actions**.
 
 Once enabled, the site will be available at:
 
-- `https://rubao13.github.io/deenergy/`
+- `https://ruuubens.github.io/deenergy/`
 
 ### Local build (static HTML)
 
