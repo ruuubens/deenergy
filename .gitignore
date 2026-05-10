@@ -10,3 +10,7 @@ DerivedData/
 # SwiftPM
 .swiftpm/
 Package.resolved
+
+# Python cache
+__pycache__/
+*.pyc

@@ -6,8 +6,8 @@ env:
 on:
   workflow_dispatch:
   schedule:
-    # 05:15 UTC = 06:15 CET / 07:15 CEST
-    - cron: "15 5 * * *"
+    # 04:17 UTC (Aiming for ~06:30 Munich time, accounting for GitHub Actions queue delays)
+    - cron: "17 4 * * *"
 
 permissions:
   contents: read
