@@ -59,8 +59,9 @@ def build_rows(payload, day_cet):
     return rows
 
 
-def render_html(rows, postal_code, day_cet):
+def render_html(rows, postal_code, day_cet, processed_at):
     date_str = day_cet.strftime("%Y-%m-%d")
+    processed_str = processed_at.strftime("%Y-%m-%d %H:%M:%S %Z")
     title = f"Renewable share of electricity ({date_str}) - München (80339) Germany"
     status = "No rows for today 08:00-23:00 CET." if not rows else "Showing today's values between 08:00 and 23:00 CET."
 
@@ -94,6 +95,7 @@ def render_html(rows, postal_code, day_cet):
     .yellow {{ background-color: #fffae0; }}
     .green {{ background-color: #e4f8e4; }}
     #status {{ margin-top: 10px; font-size: 0.9rem; color: #555; }}
+    #processed-at {{ margin-top: 10px; font-size: 0.85rem; color: #888; }}
   </style>
 </head>
 <body>
@@ -112,9 +114,10 @@ def render_html(rows, postal_code, day_cet):
       {rows_block}
     </tbody>
   </table>
+  <div id=\"processed-at\">Processed at: {processed_str}</div>
 </body>
 </html>
-""".format(title=title, postal_code=postal_code, status=status, rows_block=rows_block, date_str=date_str)
+""".format(title=title, postal_code=postal_code, status=status, rows_block=rows_block, date_str=date_str, processed_str=processed_str)
 
 
 def main():
@@ -126,12 +129,13 @@ def main():
     args = parser.parse_args()
 
     day_cet = date.fromisoformat(args.date) if args.date else datetime.now(CET).date()
+    processed_at = datetime.now(CET)
 
     with open(args.input, "r", encoding="utf-8") as fh:
         payload = json.load(fh)
 
     rows = build_rows(payload, day_cet)
-    html = render_html(rows, args.postal_code, day_cet)
+    html = render_html(rows, args.postal_code, day_cet, processed_at)
 
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     with open(args.output, "w", encoding="utf-8") as fh:
