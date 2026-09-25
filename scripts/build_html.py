@@ -114,7 +114,7 @@ def render_html(rows, postal_code, day_cet, processed_at):
       {rows_block}
     </tbody>
   </table>
-  <div id=\"processed-at\">Processed at: {processed_str}</div>
+  <div id=\"processed-at\">Processed at: {processed_str} - Token expires on 15.12.2026</div>
 </body>
 </html>
 """.format(title=title, postal_code=postal_code, status=status, rows_block=rows_block, date_str=date_str, processed_str=processed_str)
